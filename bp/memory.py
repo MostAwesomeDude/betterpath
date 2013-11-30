@@ -82,16 +82,10 @@ class MemoryPath(AbstractFilePath):
         if self._path:
             return MemoryPath(self._fs, self._path[:-1])
         else:
-            raise Exception("Root has no parents")
+            return self
 
     def child(self, name):
         return MemoryPath(self._fs, self._path + (name,))
-
-    def sibling(self, name):
-        if self._path:
-            return MemoryPath(self._fs, self._path[:-1] + (name,))
-        else:
-            raise Exception("Root has no siblings")
 
     def basename(self):
         return self._path[-1] if self._path else ""

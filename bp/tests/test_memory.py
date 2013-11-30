@@ -24,3 +24,4 @@ class MemoryPathTestCase(AbstractFilePathTestCase):
         self.fs = MemoryFS()
         AbstractFilePathTestCase.setUp(self)
         self.path = MemoryPath(self.fs)
+        self.root = self.path

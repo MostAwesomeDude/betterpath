@@ -107,6 +107,13 @@ class AbstractFilePathTestCase(BytesTestCase):
         x = [foo.path for foo in self.path.walk()]
         self.assertEqual(set(x), set(self.all))
 
+    def test_rootParent(self):
+        """
+        IFilePath roots are their own parents.
+        """
+
+        self.assertEqual(self.root, self.root.parent())
+
     def test_parents(self):
         """
         L{FilePath.parents()} should return an iterator of every ancestor of
