@@ -134,6 +134,9 @@ class IFilePath(Interface):
     def parent():
         """
         A file path for the directory containing the file at this file path.
+
+        As a special case, the file path representing the root is its own
+        parent; this invariant must always be preserved.
         """
 
     def sibling(name):
