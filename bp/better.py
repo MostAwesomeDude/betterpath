@@ -205,28 +205,8 @@ class AbstractFilePath(object):
             return segments
         raise ValueError("%r not parent of %r" % (ancestor, self))
 
-    # new in 8.0
     def __hash__(self):
         """
         Hash the same as another L{FilePath} with the same path as mine.
         """
         return hash((self.__class__, self.path))
-
-    # pending deprecation in 8.0
-    def getmtime(self):
-        """
-        Deprecated.  Use getModificationTime instead.
-        """
-        return int(self.getModificationTime())
-
-    def getatime(self):
-        """
-        Deprecated.  Use getAccessTime instead.
-        """
-        return int(self.getAccessTime())
-
-    def getctime(self):
-        """
-        Deprecated.  Use getStatusChangeTime instead.
-        """
-        return int(self.getStatusChangeTime())

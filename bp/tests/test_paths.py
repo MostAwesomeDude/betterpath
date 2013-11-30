@@ -229,16 +229,6 @@ class AbstractFilePathTestCase(BytesTestCase):
             self.assertEqual(type(p.getModificationTime()), float)
             self.assertEqual(type(p.getStatusChangeTime()), float)
 
-    def test_oldTimesAreInts(self):
-        """
-        Verify that all times returned from the various time functions are
-        integers, for compatibility.
-        """
-        for p in self.path, self.path.child(b'file1'):
-            self.assertEqual(type(p.getatime()), int)
-            self.assertEqual(type(p.getmtime()), int)
-            self.assertEqual(type(p.getctime()), int)
-
 
 class FakeWindowsPath(filepath.FilePath):
     """
@@ -760,9 +750,9 @@ class FilePathTestCase(AbstractFilePathTestCase):
         p = self.path.child(b'stattest')
         p.touch()
         self.assertEqual(p.getsize(), 0)
-        self.assertEqual(abs(p.getmtime() - time.time()) // 20, 0)
-        self.assertEqual(abs(p.getctime() - time.time()) // 20, 0)
-        self.assertEqual(abs(p.getatime() - time.time()) // 20, 0)
+        self.assertEqual(abs(p.getModificationTime() - time.time()) // 20, 0)
+        self.assertEqual(abs(p.getStatusChangeTime() - time.time()) // 20, 0)
+        self.assertEqual(abs(p.getAccessTime() - time.time()) // 20, 0)
         self.assertEqual(p.exists(), True)
         self.assertEqual(p.exists(), True)
         # OOB removal: FilePath.remove() will automatically restat

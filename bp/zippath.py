@@ -162,14 +162,9 @@ class ZipPath(AbstractFilePath):
             self.archive.zipfile.NameToInfo[self.pathInArchive].date_time
             + (0, 0, 0))
 
-    def getStatusChangeTime(self):
-        """
-        Retrieve this file's last modification time.  This name is provided for
-        compatibility, and returns the same value as getmtime.
-
-        @return: a number of seconds since the epoch.
-        """
-        return self.getModificationTime()
+    # ZIP archives have no independent notion of ctime, so mtime is used for
+    # both. It's technically correct. ~ C.
+    getStatusChangeTime = getModificationTime
 
 
 class ZipArchive(ZipPath):

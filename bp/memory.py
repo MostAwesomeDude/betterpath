@@ -100,13 +100,13 @@ class MemoryPath(AbstractFilePath):
             raise Exception("Non-file has no size")
 
     def getModificationTime(self):
-        return 0
+        return 0.0
 
     def getStatusChangeTime(self):
-        return 0
+        return 0.0
 
     def getAccessTime(self):
-        return 0
+        return 0.0
 
     def listdir(self):
         """
