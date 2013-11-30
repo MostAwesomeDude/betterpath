@@ -30,6 +30,8 @@ class IFilePath(Interface):
 
     sep = Attribute("The path separator to use in string representations")
 
+    path = Attribute("A string representation of the path")
+
     def child(name):
         """
         Obtain a direct child of this file path.  The child may or may not

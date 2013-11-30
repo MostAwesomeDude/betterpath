@@ -59,6 +59,13 @@ class MemoryPath(AbstractFilePath):
         self._fs = fs
         self._path = path
 
+    def __eq__(self, other):
+        return self._fs == other._fs and self._path == other._path
+
+    @property
+    def path(self):
+        return self.sep.join(("/mem",) + self._path)
+
     def changed(self):
         pass
 
