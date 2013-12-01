@@ -76,6 +76,9 @@ class MemoryPath(AbstractFilePath):
     def isfile(self):
         return self._path in self._fs._store
 
+    def islink(self):
+        return False
+
     def exists(self):
         return self.isdir() or self.isfile()
 

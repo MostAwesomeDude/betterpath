@@ -114,6 +114,14 @@ class IFilePath(Interface):
             C{False} otherwise.
         """
 
+    def islink():
+        """
+        Check if this file path refers to a symbolic ("soft") link.
+
+        @return: C{True} if the file at this file path is a symbolic link, or
+            C{False} otherwise.
+        """
+
     def children():
         """
         List the children of this path object.
