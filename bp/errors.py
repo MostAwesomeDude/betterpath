@@ -5,23 +5,8 @@ class LinkError(Exception):
     """
 
 
-class UnlistableError(OSError):
+class UnlistableError(Exception):
     """
     An exception which is used to distinguish between errors which mean 'this
     is not a directory you can list' and other, more catastrophic errors.
-
-    This error will try to look as much like the original error as possible,
-    while still being catchable as an independent type.
-
-    @ivar originalException: the actual original exception instance, either an
-        L{OSError} or a L{WindowsError}.
     """
-
-    def __init__(self, originalException):
-        """
-        Create an UnlistableError exception.
-
-        @param originalException: an instance of OSError.
-        """
-        self.__dict__.update(originalException.__dict__)
-        self.originalException = originalException

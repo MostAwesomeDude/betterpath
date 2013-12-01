@@ -4,6 +4,7 @@ from zope.interface import implementer
 
 from bp.abstract import IFilePath
 from bp.better import AbstractFilePath
+from bp.errors import UnlistableError
 
 DIR = object()
 FILE = object()
@@ -112,6 +113,9 @@ class MemoryPath(AbstractFilePath):
         """
         Pretend that we are a directory and get a listing of child names.
         """
+
+        if self._path not in self._fs._dirs:
+            raise UnlistableError()
 
         i = self._fs._store.iterkeys()
 

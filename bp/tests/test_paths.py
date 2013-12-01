@@ -245,43 +245,6 @@ class FakeWindowsPath(filepath.FilePath):
             "A directory's validness was called into question")
 
 
-class ListingCompatibilityTests(BytesTestCase):
-    """
-    These tests verify compatibility with legacy behavior of directory
-    listing.
-    """
-
-    def test_windowsErrorExcept(self):
-        """
-        Verify that when a WindowsError is raised from listdir, catching
-        WindowsError works.
-        """
-        fwp = FakeWindowsPath(self.mktemp())
-        self.assertRaises(UnlistableError, fwp.children)
-
-    def test_alwaysCatchOSError(self):
-        """
-        Verify that in the normal case where a directory does not exist, we
-        will get an OSError.
-        """
-        fp = filepath.FilePath(self.mktemp())
-        self.assertRaises(OSError, fp.children)
-
-    def test_keepOriginalAttributes(self):
-        """
-        Verify that the Unlistable exception raised will preserve the
-        attributes of the previously-raised exception.
-        """
-        fp = filepath.FilePath(self.mktemp())
-        ose = self.assertRaises(OSError, fp.children)
-        d1 = list(ose.__dict__.keys())
-        d1.remove('originalException')
-        d2 = list(ose.originalException.__dict__.keys())
-        d1.sort()
-        d2.sort()
-        self.assertEqual(d1, d2)
-
-
 class ExplodingFile:
     """
     A C{file}-alike which raises exceptions from its I/O methods and keeps
