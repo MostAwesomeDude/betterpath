@@ -1,3 +1,4 @@
+from itertools import chain
 from StringIO import StringIO
 
 from zope.interface import implementer
@@ -44,6 +45,10 @@ class MemoryFS(object):
             return MemoryFile(self._store, path)
 
 
+def format_memory_path(path, sep):
+    return sep.join(("/mem",) + path)
+
+
 @implementer(IFilePath)
 class MemoryPath(AbstractFilePath):
     """
@@ -65,7 +70,7 @@ class MemoryPath(AbstractFilePath):
 
     @property
     def path(self):
-        return self.sep.join(("/mem",) + self._path)
+        return format_memory_path(self._path, self.sep)
 
     def changed(self):
         pass
@@ -123,7 +128,7 @@ class MemoryPath(AbstractFilePath):
         if self._path not in self._fs._dirs:
             raise UnlistableError()
 
-        i = self._fs._store.iterkeys()
+        i = chain(self._fs._dirs, self._fs._store.iterkeys())
 
         # Linear-time search. Could be better.
         p = self._path
