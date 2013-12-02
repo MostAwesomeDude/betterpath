@@ -322,20 +322,20 @@ class FilePath(AbstractFilePath):
         another...).  If the filesystem does not support symlinks, or
         if the link is cyclical, raises a L{LinkError}.
 
-        Behaves like L{os.path.realpath} in that it does not resolve link
-        names in the middle (ex. /x/y/z, y is a link to w - realpath on z
-        will return /x/y/z, not /x/w/z).
-
         @return: L{FilePath} of the target path.
         @rtype: L{FilePath}
         @raises LinkError: if links are not supported or links are cyclical.
         """
-        if self.islink():
-            result = os.path.realpath(self.path)
-            if result == self.path:
+        result = os.path.realpath(self.path)
+
+        if result == self.path:
+            if self.islink():
                 raise LinkError("Cyclical link - will loop forever")
+            else:
+                # We were already correctly unaliased.
+                return self
+        else:
             return self.clonePath(result)
-        return self
 
     def siblingExtension(self, ext):
         """
