@@ -131,15 +131,20 @@ class AbstractFilePath(object):
 
         @return: a generator yielding FilePath-like objects.
         """
+
+        # Note that we already agreed to yield ourselves if we've been called.
         yield self
+
         if self.isdir():
             for c in self.children():
                 # we should first see if it's what we want, then we
                 # can walk through the directory
-                if (descend is None or descend(c)):
+                if descend is None or descend(c):
                     for subc in c.walk(descend):
-                        if os.path.realpath(self.path).startswith(
-                                os.path.realpath(subc.path)):
+                        # Check for symlink loops.
+                        rsubc = subc.realpath()
+                        rself = self.realpath()
+                        if rsubc == rself or rsubc in rself.parents():
                             raise LinkError("Cycle in file graph.")
                         yield subc
                 else:
