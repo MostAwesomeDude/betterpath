@@ -94,6 +94,9 @@ class MemoryPath(AbstractFilePath):
     def basename(self):
         return self._path[-1] if self._path else ""
 
+    def realpath(self):
+        return self
+
     def open(self, mode="r"):
         return self._fs.open(self._path)
 

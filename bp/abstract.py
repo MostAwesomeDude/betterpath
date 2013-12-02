@@ -9,8 +9,8 @@ class IFilePath(Interface):
     organized into a hierarchy; a file path can can children which are
     themselves file paths.
 
-    A file path has a name which unique identifies it in the context of its
-    parent (if it has one); a file path can not have two children with the same
+    A file path has a name which uniquely identifies it in the context of its
+    parent, if it has one; a file path can not have two children with the same
     name.  This name is referred to as the file path's "base name".
 
     A series of such names can be used to locate nested children of a file
@@ -26,6 +26,10 @@ class IFilePath(Interface):
     system path will not allow the use of the path separator in a name, and
     certain names (eg. C{"."} and C{".."}) may be reserved or have special
     meanings.
+
+    Note that, in the presence of symlinks, two file paths may differ in
+    equality but address the same data; this is called "aliasing" and is
+    completely legal.
     """
 
     sep = Attribute("The path separator to use in string representations")
@@ -155,4 +159,12 @@ class IFilePath(Interface):
             direct sibling of this path and may not contain a path separator.
 
         @return: a sibling file path of this one.
+        """
+
+    def realpath():
+        """
+        A symbolic-link-free file path that is alias-equivalent to this file
+        path.
+
+        @return: a file path.
         """

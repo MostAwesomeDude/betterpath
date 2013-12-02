@@ -127,6 +127,9 @@ class ZipPath(AbstractFilePath):
         # less meaningful here.
         return self.parent().path
 
+    def realpath(self):
+        return self
+
     def open(self, mode="r"):
         return self.archive.zipfile.open(self.pathInArchive, mode=mode)
 
