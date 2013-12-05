@@ -166,6 +166,13 @@ class AbstractFilePathTestCase(BytesTestCase):
         with contextlib.closing(f2.open()) as f:
             self.assertEqual(f.read(), self.f2content)
 
+    def test_createDirectory(self):
+        """
+        createDirectory() can create new directories.
+        """
+
+        self.path.child(b"directory").createDirectory()
+
     def test_multipleChildSegments(self):
         """
         C{fp.descendant([a, b, c])} returns the same L{FilePath} as is returned

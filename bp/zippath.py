@@ -133,6 +133,10 @@ class ZipPath(AbstractFilePath):
     def open(self, mode="r"):
         return self.archive.zipfile.open(self.pathInArchive, mode=mode)
 
+    def createDirectory(self):
+        # No-op; there's nothing to do.
+        pass
+
     def changed(self):
         pass
 

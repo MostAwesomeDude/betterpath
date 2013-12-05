@@ -8,3 +8,12 @@ class ReadOnlyPathTestCase(AbstractFilePathTestCase):
         AbstractFilePathTestCase.setUp(self)
 
         self.path = ReadOnlyPath(self.path)
+
+    def test_createDirectory(self):
+        """
+        createDirectory() cannot create new directories on a read-only file
+        path.
+        """
+
+        self.assertRaises(Exception,
+                          self.path.child(b"directory").createDirectory)

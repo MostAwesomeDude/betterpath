@@ -105,6 +105,9 @@ class MemoryPath(AbstractFilePath):
     def open(self, mode="r"):
         return self._fs.open(self._path)
 
+    def createDirectory(self):
+        self._fs._dirs.add(self._path)
+
     def getsize(self):
         if self._path in self._fs._store:
             return len(self._fs._store[self._path])

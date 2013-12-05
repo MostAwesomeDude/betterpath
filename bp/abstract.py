@@ -56,6 +56,13 @@ class IFilePath(Interface):
         @raise Exception: if this file path cannot be opened.
         """
 
+    def createDirectory():
+        """
+        Create this file path as a directory.
+
+        @raise Exception: If the directory cannot be created.
+        """
+
     def changed():
         """
         Clear any cached information about the state of this path on disk.

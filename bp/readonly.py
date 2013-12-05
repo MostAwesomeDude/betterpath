@@ -56,6 +56,9 @@ class ReadOnlyPath(AbstractFilePath):
             raise Exception("Path is read-only")
         return self._fp.open(mode)
 
+    def createDirectory(self):
+        raise Exception("Path is read-only")
+
     def getsize(self):
         return self._fp.getsize()
 
