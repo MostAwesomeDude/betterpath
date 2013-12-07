@@ -1,11 +1,13 @@
 from zope.interface import implementer
 
 from bp.abstract import IFilePath
-from bp.better import AbstractFilePath
+from bp.generic import (genericChildren, genericDescendant, genericParents,
+                        genericSegmentsFrom, genericSibling, genericWalk)
 from bp.util import modeIsWriting
 
+
 @implementer(IFilePath)
-class ReadOnlyPath(AbstractFilePath):
+class ReadOnlyPath(object):
     """
     An IFilePath which is intrinsically read-only in every aspect.
     """
@@ -24,8 +26,20 @@ class ReadOnlyPath(AbstractFilePath):
             return NotImplemented
         return cmp(self._fp, other._fp)
 
+    def __hash__(self):
+        return hash((ReadOnlyPath, self._fp))
+
     def listdir(self):
         return self._fp.listdir()
+
+    # IFilePath generics
+
+    children = genericChildren
+    descendant = genericDescendant
+    parents = genericParents
+    segmentsFrom = genericSegmentsFrom
+    sibling = genericSibling
+    walk = genericWalk
 
     # IFilePath navigation
 
