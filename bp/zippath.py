@@ -12,14 +12,13 @@ __metaclass__ = type
 import os
 import time
 import errno
-
-
 from zipfile import ZipFile
+
+from zope.interface import implementer
 
 from bp.abstract import IFilePath
 from bp.filepath import FilePath, AbstractFilePath
-
-from zope.interface import implementer
+from bp.errors import UnlistableError
 
 # using FilePath here exclusively rather than os to make sure that we don't do
 # anything OS-path-specific here.
@@ -106,9 +105,9 @@ class ZipPath(AbstractFilePath):
             if self.isdir():
                 return self.archive.childmap[self.pathInArchive].keys()
             else:
-                raise OSError(errno.ENOTDIR, "Leaf zip entry listed")
+                raise UnlistableError("Leaf zip entry listed")
         else:
-            raise OSError(errno.ENOENT, "Non-existent zip entry listed")
+            raise UnlistableError("Non-existent zip entry listed")
 
     def splitext(self):
         """

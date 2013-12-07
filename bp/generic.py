@@ -1,13 +1,23 @@
 def genericSibling(path, segment):
     """
-    Return a L{FilePath} with the same directory as this instance but with
-    a basename of C{path}.
+    Return a L{IFilePath} with the same directory as the given path, but with a
+    basename of C{segment}.
 
-    @param path: The basename of the L{FilePath} to return.
-    @type path: L{str}
+    @param segment: The basename of the L{IFilePath} to return.
+    @type segment: L{str}
 
     @return: The sibling path.
-    @rtype: L{FilePath}
+    @rtype: L{IFilePath}
     """
 
     return path.parent().child(segment)
+
+
+def genericChildren(path):
+    """
+    List the children of the given path.
+
+    @return: an iterable of all currently-existing children of the path.
+    """
+
+    return map(path.child, path.listdir())

@@ -32,9 +32,10 @@ from zope.interface import implementer
 
 from bp.abstract import IFilePath
 from bp.better import AbstractFilePath
-from bp.errors import LinkError
-
-from bp.win32 import isWindows, O_BINARY
+from bp.errors import LinkError, UnlistableError
+from bp.win32 import (ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND,
+                      ERROR_INVALID_NAME, ERROR_DIRECTORY, O_BINARY,
+                      isWindows, WindowsError)
 
 
 _CREATE_FLAGS = (os.O_EXCL |
@@ -705,10 +706,58 @@ class FilePath(AbstractFilePath):
             this L{FilePath}.
         @rtype: L{list}
 
+        @raise OSError: If an error occurs while listing the directory.  If the
+        error is 'serious', meaning that the operation failed due to an access
+        violation, exhaustion of some kind of resource (file descriptors or
+        memory), OSError or a platform-specific variant will be raised.
+
+        @raise UnlistableError: If the inability to list the directory is due
+        to this path not existing or not being a directory, the more specific
+        OSError subclass L{UnlistableError} is raised instead.
+
         @raise: Anything the platform L{os.listdir} implementation might raise
             (typically L{OSError}).
         """
-        return listdir(self.path)
+        try:
+            subnames = listdir(self.path)
+        except WindowsError as winErrObj:
+            # WindowsError is an OSError subclass, so if not for this clause
+            # the OSError clause below would be handling these.  Windows error
+            # codes aren't the same as POSIX error codes, so we need to handle
+            # them differently.
+
+            # Under Python 2.5 on Windows, WindowsError has a winerror
+            # attribute and an errno attribute.  The winerror attribute is
+            # bound to the Windows error code while the errno attribute is
+            # bound to a translation of that code to a perhaps equivalent POSIX
+            # error number.
+
+            # Under Python 2.4 on Windows, WindowsError only has an errno
+            # attribute.  It is bound to the Windows error code.
+
+            # For simplicity of code and to keep the number of paths through
+            # this suite minimal, we grab the Windows error code under either
+            # version.
+
+            # Furthermore, attempting to use os.listdir on a non-existent path
+            # in Python 2.4 will result in a Windows error code of
+            # ERROR_PATH_NOT_FOUND.  However, in Python 2.5,
+            # ERROR_FILE_NOT_FOUND results instead. -exarkun
+            winerror = getattr(winErrObj, 'winerror', winErrObj.errno)
+            if winerror not in (ERROR_PATH_NOT_FOUND,
+                                ERROR_FILE_NOT_FOUND,
+                                ERROR_INVALID_NAME,
+                                ERROR_DIRECTORY):
+                raise
+            raise UnlistableError(winErrObj)
+        except OSError as ose:
+            if ose.errno not in (errno.ENOENT, errno.ENOTDIR):
+                # Other possible errors here, according to linux manpages:
+                # EACCES, EMIFLE, ENFILE, ENOMEM.  None of these seem like the
+                # sort of thing which should be handled normally. -glyph
+                raise
+            raise UnlistableError(ose)
+        return subnames
 
     def splitext(self):
         """
