@@ -31,8 +31,10 @@ from zope.interface import implementer
 # modified for inclusion in the standard library.  --glyph
 
 from bp.abstract import IFilePath
-from bp.better import AbstractFilePath
 from bp.errors import LinkError, UnlistableError
+from bp.generic import (genericChildren, genericDescendant, genericGetContent,
+                        genericParents, genericSegmentsFrom, genericSibling,
+                        genericWalk)
 from bp.win32 import (ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND,
                       ERROR_INVALID_NAME, ERROR_DIRECTORY, O_BINARY,
                       isWindows, WindowsError)
@@ -152,7 +154,7 @@ class Permissions(namedtuple("Permissions", "user, group, other")):
 
 
 @implementer(IFilePath)
-class FilePath(AbstractFilePath):
+class FilePath(object):
     """
     I am a path on the filesystem that only permits 'downwards' access.
 
@@ -205,6 +207,14 @@ class FilePath(AbstractFilePath):
 
     sep = slash.encode("ascii")
 
+    children = genericChildren
+    descendant = genericDescendant
+    getContent = genericGetContent
+    parents = genericParents
+    segmentsFrom = genericSegmentsFrom
+    sibling = genericSibling
+    walk = genericWalk
+
     def __init__(self, path, alwaysCreate=False):
         """
         Convert a path string to an absolute path if necessary and initialize
@@ -222,6 +232,12 @@ class FilePath(AbstractFilePath):
         if 'statinfo' in d:
             del d['statinfo']
         return d
+
+    def __hash__(self):
+        """
+        Hash the same as another L{FilePath} with the same path as mine.
+        """
+        return hash((FilePath, self.path))
 
     def child(self, path):
         """
