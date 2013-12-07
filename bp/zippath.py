@@ -11,7 +11,6 @@ __metaclass__ = type
 
 import os
 import time
-import errno
 from zipfile import ZipFile
 
 from zope.interface import implementer

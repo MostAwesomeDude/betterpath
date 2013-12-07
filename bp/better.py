@@ -1,12 +1,7 @@
 from __future__ import division, absolute_import
 
-import errno
-import os
-
-from bp.errors import LinkError, UnlistableError
-from bp.generic import genericChildren, genericSibling
-from bp.win32 import (ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND,
-                      ERROR_INVALID_NAME, ERROR_DIRECTORY, WindowsError)
+from bp.errors import LinkError
+from bp.generic import genericChildren, genericParents, genericSibling
 
 
 class AbstractFilePath(object):
@@ -45,20 +40,7 @@ class AbstractFilePath(object):
         finally:
             fp.close()
 
-    def parents(self):
-        """
-        Retrieve an iterator of all the ancestors of this path.
-
-        @return: an iterator of all the ancestors of this path, from the most
-        recent (its immediate parent) to the root of its filesystem.
-        """
-        path = self
-        parent = path.parent()
-        # root.parent() == root, so this means "are we the root"
-        while path != parent:
-            yield parent
-            path = parent
-            parent = parent.parent()
+    parents = genericParents
 
     children = genericChildren
 

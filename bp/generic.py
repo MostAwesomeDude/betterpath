@@ -1,3 +1,19 @@
+def genericParents(path):
+    """
+    Retrieve an iterator of all the ancestors of the given path.
+
+    @return: an iterator of all the ancestors of the given path, from the most
+             recent (its immediate parent) to the root of its filesystem.
+    """
+
+    parent = path.parent()
+    # root.parent() == root, so this means "are we the root"
+    while path != parent:
+        yield parent
+        path = parent
+        parent = parent.parent()
+
+
 def genericSibling(path, segment):
     """
     Return a L{IFilePath} with the same directory as the given path, but with a
