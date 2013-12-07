@@ -183,14 +183,16 @@ class ZipArchive(ZipPath):
 
     archive = property(lambda self: self)
 
-    def __init__(self, archivePathname):
+    def __init__(self, archivePathname, mode="r"):
         """
         Create a ZipArchive, treating the archive at archivePathname as a zip
         file.
 
         @param archivePathname: a str, naming a path in the filesystem.
+        @param mode: A file mode which can be "r" for reading, "w" for
+                     truncating and writing, or "a" for appending and writing.
         """
-        self.zipfile = ZipFile(archivePathname)
+        self.zipfile = ZipFile(archivePathname, mode)
         self.path = archivePathname
         self.pathInArchive = ''
         # zipfile is already wasting O(N) memory on cached ZipInfo instances,
