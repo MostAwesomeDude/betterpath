@@ -1,3 +1,6 @@
+from bp.errors import LinkError
+
+
 def genericParents(path):
     """
     Retrieve an iterator of all the ancestors of the given path.
@@ -37,3 +40,55 @@ def genericChildren(path):
     """
 
     return map(path.child, path.listdir())
+
+
+def genericWalk(path, descend=None):
+    """
+    Yield a path, then each of its children, and each of those children's
+    children in turn.
+
+    The optional argument C{descend} is a predicate that takes a FilePath,
+    and determines whether or not that FilePath is traversed/descended
+    into.  It will be called with each path for which C{isdir} returns
+    C{True}.  If C{descend} is not specified, all directories will be
+    traversed (including symbolic links which refer to directories).
+
+    @param descend: A one-argument callable that will return True for
+        FilePaths that should be traversed, False otherwise.
+
+    @return: a generator yielding FilePath-like objects.
+    """
+
+    # Note that we already agreed to yield this path.
+    yield path
+
+    if path.isdir():
+        for c in path.children():
+            # we should first see if it's what we want, then we
+            # can walk through the directory
+            if descend is None or descend(c):
+                for subc in c.walk(descend):
+                    # Check for symlink loops.
+                    rsubc = subc.realpath()
+                    rself = path.realpath()
+                    if rsubc == rself or rsubc in rself.parents():
+                        raise LinkError("Cycle in file graph.")
+                    yield subc
+            else:
+                yield c
+
+
+def genericDescendant(path, segments):
+    """
+    Retrieve a child or child's child of the given path.
+
+    @param segments: A sequence of path segments as L{str} instances.
+
+    @return: A L{FilePath} constructed by looking up the C{segments[0]}
+        child of this path, the C{segments[1]} child of that path, and so
+        on.
+    """
+
+    for name in segments:
+        path = path.child(name)
+    return path

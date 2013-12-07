@@ -6,6 +6,8 @@ from zope.interface import implementer
 from bp.abstract import IFilePath
 from bp.better import AbstractFilePath
 from bp.errors import UnlistableError
+from bp.generic import (genericChildren, genericParents, genericSibling,
+                        genericWalk)
 
 DIR = object()
 FILE = object()
@@ -72,6 +74,42 @@ class MemoryPath(AbstractFilePath):
     def path(self):
         return format_memory_path(self._path, self.sep)
 
+    def listdir(self):
+        """
+        Pretend that we are a directory and get a listing of child names.
+        """
+
+        if self._path not in self._fs._dirs:
+            raise UnlistableError()
+
+        i = chain(self._fs._dirs, self._fs._store.iterkeys())
+
+        # Linear-time search. Could be better.
+        p = self._path
+        l = len(p) + 1
+        ks = [t[-1] for t in i if t[:-1] == p and len(t) == l]
+
+        return ks
+
+    # IFilePath methods
+
+    children = genericChildren
+    parents = genericParents
+    sibling = genericSibling
+    walk = genericWalk
+
+    def parent(self):
+        if self._path:
+            return MemoryPath(self._fs, self._path[:-1])
+        else:
+            return self
+
+    def child(self, name):
+        return MemoryPath(self._fs, self._path + (name,))
+
+    def descendant(self, segments):
+        return MemoryPath(self._fs, self._path + tuple(segments))
+
     def changed(self):
         pass
 
@@ -86,15 +124,6 @@ class MemoryPath(AbstractFilePath):
 
     def exists(self):
         return self.isdir() or self.isfile()
-
-    def parent(self):
-        if self._path:
-            return MemoryPath(self._fs, self._path[:-1])
-        else:
-            return self
-
-    def child(self, name):
-        return MemoryPath(self._fs, self._path + (name,))
 
     def basename(self):
         return self._path[-1] if self._path else ""
@@ -122,20 +151,3 @@ class MemoryPath(AbstractFilePath):
 
     def getAccessTime(self):
         return 0.0
-
-    def listdir(self):
-        """
-        Pretend that we are a directory and get a listing of child names.
-        """
-
-        if self._path not in self._fs._dirs:
-            raise UnlistableError()
-
-        i = chain(self._fs._dirs, self._fs._store.iterkeys())
-
-        # Linear-time search. Could be better.
-        p = self._path
-        l = len(p) + 1
-        ks = [t[-1] for t in i if t[:-1] == p and len(t) == l]
-
-        return ks

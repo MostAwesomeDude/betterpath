@@ -33,8 +33,27 @@ class IFilePath(Interface):
     """
 
     sep = Attribute("The path separator to use in string representations")
-
     path = Attribute("A string representation of the path")
+
+    # Navigation
+
+    def parent():
+        """
+        A file path for the directory containing the file at this file path.
+
+        As a special case, the file path representing the root is its own
+        parent; this invariant must always be preserved.
+        """
+
+    def sibling(name):
+        """
+        A file path for the directory containing the file at this file path.
+
+        @param name: the name of a sibling of this path. C{name} must be a
+            direct sibling of this path and may not contain a path separator.
+
+        @return: a sibling file path of this one.
+        """
 
     def child(name):
         """
@@ -47,6 +66,27 @@ class IFilePath(Interface):
         @raise InsecurePath: if C{name} describes a file path that is not a
             direct child of this file path.
         """
+
+    def children():
+        """
+        List the children of this path object.
+
+        @return: a sequence of the children of the directory at this file path.
+        @raise Exception: if the file at this file path is not a directory.
+        """
+
+    # Segments
+
+    def basename():
+        """
+        Retrieve the final component of the file path's path (everything
+        after the final path separator).
+
+        @return: the base name of this file path.
+        @rtype: L{str}
+        """
+
+    # Writing
 
     def open(mode="r"):
         """
@@ -62,6 +102,8 @@ class IFilePath(Interface):
 
         @raise Exception: If the directory cannot be created.
         """
+
+    # Stat and other queries
 
     def changed():
         """
@@ -133,40 +175,7 @@ class IFilePath(Interface):
             C{False} otherwise.
         """
 
-    def children():
-        """
-        List the children of this path object.
-
-        @return: a sequence of the children of the directory at this file path.
-        @raise Exception: if the file at this file path is not a directory.
-        """
-
-    def basename():
-        """
-        Retrieve the final component of the file path's path (everything
-        after the final path separator).
-
-        @return: the base name of this file path.
-        @rtype: L{str}
-        """
-
-    def parent():
-        """
-        A file path for the directory containing the file at this file path.
-
-        As a special case, the file path representing the root is its own
-        parent; this invariant must always be preserved.
-        """
-
-    def sibling(name):
-        """
-        A file path for the directory containing the file at this file path.
-
-        @param name: the name of a sibling of this path. C{name} must be a
-            direct sibling of this path and may not contain a path separator.
-
-        @return: a sibling file path of this one.
-        """
+    # Symlinks
 
     def realpath():
         """
