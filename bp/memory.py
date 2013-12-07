@@ -6,8 +6,8 @@ from zope.interface import implementer
 from bp.abstract import IFilePath
 from bp.better import AbstractFilePath
 from bp.errors import UnlistableError
-from bp.generic import (genericChildren, genericParents, genericSibling,
-                        genericWalk)
+from bp.generic import (genericChildren, genericParents, genericSegmentsFrom,
+                        genericSibling, genericWalk)
 
 DIR = object()
 FILE = object()
@@ -95,6 +95,7 @@ class MemoryPath(AbstractFilePath):
 
     children = genericChildren
     parents = genericParents
+    segmentsFrom = genericSegmentsFrom
     sibling = genericSibling
     walk = genericWalk
 

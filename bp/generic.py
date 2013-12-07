@@ -92,3 +92,36 @@ def genericDescendant(path, segments):
     for name in segments:
         path = path.child(name)
     return path
+
+
+def genericSegmentsFrom(path, ancestor):
+    """
+    Return a list of segments between a child and its ancestor.
+
+    For example, in the case of a path X representing /a/b/c/d and a path Y
+    representing /a/b, C{Y.segmentsFrom(X)} will return C{['c',
+    'd']}.
+
+    @param ancestor: an instance of the same class as self, ostensibly an
+    ancestor of self.
+
+    @raise: ValueError if the 'ancestor' parameter is not actually an
+    ancestor, i.e. a path for /x/y/z is passed as an ancestor for /a/b/c/d.
+
+    @return: a list of strs
+    """
+
+    # The original author alludes to an "obvious fast implementation". I
+    # cannot envision an obvious fast implementation which behaves
+    # correctly on arbitrary IFilePaths, so I will leave this here for the
+    # next brave hacker. ~ C.
+    f = path
+    p = f.parent()
+    segments = []
+    while f != ancestor and f != p:
+        segments.append(f.basename())
+        f, p = p, p.parent()
+    if f == ancestor and segments:
+        segments.reverse()
+        return segments
+    raise ValueError("%r not parent of %r" % (ancestor, path))
