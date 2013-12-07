@@ -16,8 +16,10 @@ from zipfile import ZipFile
 from zope.interface import implementer
 
 from bp.abstract import IFilePath
-from bp.filepath import FilePath, AbstractFilePath
 from bp.errors import UnlistableError
+from bp.filepath import FilePath
+from bp.generic import (genericChildren, genericDescendant, genericParents,
+                        genericSegmentsFrom, genericSibling, genericWalk)
 
 # using FilePath here exclusively rather than os to make sure that we don't do
 # anything OS-path-specific here.
@@ -27,7 +29,7 @@ ZIP_PATH_SEP = '/'              # In zipfiles, "/" is universally used as the
 
 
 @implementer(IFilePath)
-class ZipPath(AbstractFilePath):
+class ZipPath(object):
     """
     I represent a file or directory contained within a zip file.
     """
@@ -55,11 +57,25 @@ class ZipPath(AbstractFilePath):
         return cmp((self.archive, self.pathInArchive),
                    (other.archive, other.pathInArchive))
 
+    def __hash__(self):
+        return hash((ZipPath, self.path))
+
     def __repr__(self):
         parts = [os.path.abspath(self.archive.path)]
         parts.extend(self.pathInArchive.split(ZIP_PATH_SEP))
         path = os.sep.join(parts)
         return "ZipPath('%s')" % (path.encode('string-escape'),)
+
+    # IFilePath generics
+
+    parents = genericParents
+    children = genericChildren
+    walk = genericWalk
+    sibling = genericSibling
+    descendant = genericDescendant
+    segmentsFrom = genericSegmentsFrom
+
+    # IFilePath methods
 
     def parent(self):
         splitup = self.pathInArchive.split(ZIP_PATH_SEP)
@@ -85,7 +101,22 @@ class ZipPath(AbstractFilePath):
     def sibling(self, path):
         return self.parent().child(path)
 
-    # preauthChild = child
+    # IFilePath writing and reading
+
+    def open(self, mode="r"):
+        return self.archive.zipfile.open(self.pathInArchive, mode=mode)
+
+    def createDirectory(self):
+        # No-op; there's nothing to do.
+        pass
+
+    def getContent(self):
+        return self.archive.zipfile.read(self.pathInArchive)
+
+    def setContent(self, content, ext=b'.new'):
+        self.archive.zipfile.writestr(self.pathInArchive, content)
+
+    # IFilePath stat and other queries
 
     def exists(self):
         return self.isdir() or self.isfile()
@@ -127,16 +158,6 @@ class ZipPath(AbstractFilePath):
 
     def realpath(self):
         return self
-
-    def open(self, mode="r"):
-        return self.archive.zipfile.open(self.pathInArchive, mode=mode)
-
-    def createDirectory(self):
-        # No-op; there's nothing to do.
-        pass
-
-    def setContent(self, content, ext=b'.new'):
-        self.archive.zipfile.writestr(self.pathInArchive, content)
 
     def changed(self):
         pass
