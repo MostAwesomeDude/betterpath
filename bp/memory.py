@@ -4,7 +4,6 @@ from StringIO import StringIO
 from zope.interface import implementer
 
 from bp.abstract import IFilePath
-from bp.better import AbstractFilePath
 from bp.errors import UnlistableError
 from bp.generic import (genericChildren, genericParents, genericSegmentsFrom,
                         genericSibling, genericWalk)
@@ -52,7 +51,7 @@ def format_memory_path(path, sep):
 
 
 @implementer(IFilePath)
-class MemoryPath(AbstractFilePath):
+class MemoryPath(object):
     """
     An IFilePath which shows a view into a MemoryFS.
     """
@@ -69,6 +68,9 @@ class MemoryPath(AbstractFilePath):
 
     def __eq__(self, other):
         return self._fs == other._fs and self._path == other._path
+
+    def __hash__(self):
+        return hash((MemoryPath, self._fs, self._path))
 
     @property
     def path(self):
