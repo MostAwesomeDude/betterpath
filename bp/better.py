@@ -4,6 +4,7 @@ import errno
 import os
 
 from bp.errors import LinkError, UnlistableError
+from bp.generic import genericSibling
 from bp.win32 import (ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND,
                       ERROR_INVALID_NAME, ERROR_DIRECTORY, WindowsError)
 
@@ -150,18 +151,7 @@ class AbstractFilePath(object):
                 else:
                     yield c
 
-    def sibling(self, path):
-        """
-        Return a L{FilePath} with the same directory as this instance but with
-        a basename of C{path}.
-
-        @param path: The basename of the L{FilePath} to return.
-        @type path: L{str}
-
-        @return: The sibling path.
-        @rtype: L{FilePath}
-        """
-        return self.parent().child(path)
+    sibling = genericSibling
 
     def descendant(self, segments):
         """
