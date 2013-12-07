@@ -1,8 +1,9 @@
 from __future__ import division, absolute_import
 
 from bp.errors import LinkError
-from bp.generic import (genericChildren, genericDescendant, genericParents,
-                        genericSegmentsFrom, genericSibling, genericWalk)
+from bp.generic import (genericChildren, genericDescendant, genericGetContent,
+                        genericParents, genericSegmentsFrom, genericSibling,
+                        genericWalk)
 
 
 class AbstractFilePath(object):
@@ -31,16 +32,7 @@ class AbstractFilePath(object):
      * path
     """
 
-    def getContent(self):
-        """
-        Retrieve the file-like object for this file path.
-        """
-        fp = self.open()
-        try:
-            return fp.read()
-        finally:
-            fp.close()
-
+    getContent = genericGetContent
     parents = genericParents
     children = genericChildren
     walk = genericWalk

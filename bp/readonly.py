@@ -24,6 +24,40 @@ class ReadOnlyPath(AbstractFilePath):
             return NotImplemented
         return cmp(self._fp, other._fp)
 
+    def listdir(self):
+        return self._fp.listdir()
+
+    # IFilePath navigation
+
+    def parent(self):
+        return ReadOnlyPath(self._fp.parent())
+
+    def child(self, name):
+        return ReadOnlyPath(self._fp.child(name))
+
+    # IFilePath segments
+
+    def basename(self):
+        return self._fp.basename()
+
+    # IFilePath "writing" and reading
+
+    def open(self, mode="r"):
+        if modeIsWriting(mode):
+            raise Exception("Path is read-only")
+        return self._fp.open(mode)
+
+    def createDirectory(self):
+        raise Exception("Path is read-only")
+
+    def getContent(self):
+        return self._fp.getContent()
+
+    def setContent(self, content, ext=b'.new'):
+        raise Exception("Path is read-only")
+
+    # IFilePath stat and other queries
+
     def changed(self):
         self._fp.changed()
 
@@ -39,26 +73,6 @@ class ReadOnlyPath(AbstractFilePath):
     def exists(self):
         return self._fp.exists()
 
-    def parent(self):
-        return ReadOnlyPath(self._fp.parent())
-
-    def child(self, name):
-        return ReadOnlyPath(self._fp.child(name))
-
-    def basename(self):
-        return self._fp.basename()
-
-    def realpath(self):
-        return ReadOnlyPath(self._fp.realpath())
-
-    def open(self, mode="r"):
-        if modeIsWriting(mode):
-            raise Exception("Path is read-only")
-        return self._fp.open(mode)
-
-    def createDirectory(self):
-        raise Exception("Path is read-only")
-
     def getsize(self):
         return self._fp.getsize()
 
@@ -71,5 +85,7 @@ class ReadOnlyPath(AbstractFilePath):
     def getAccessTime(self):
         return self._fp.getAccessTime()
 
-    def listdir(self):
-        return self._fp.listdir()
+    # Symlinks
+
+    def realpath(self):
+        return ReadOnlyPath(self._fp.realpath())

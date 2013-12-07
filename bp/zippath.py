@@ -135,6 +135,9 @@ class ZipPath(AbstractFilePath):
         # No-op; there's nothing to do.
         pass
 
+    def setContent(self, content, ext=b'.new'):
+        self.archive.zipfile.writestr(self.pathInArchive, content)
+
     def changed(self):
         pass
 

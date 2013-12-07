@@ -91,13 +91,15 @@ class MemoryPath(AbstractFilePath):
 
         return ks
 
-    # IFilePath methods
+    # IFilePath generic methods
 
     children = genericChildren
     parents = genericParents
     segmentsFrom = genericSegmentsFrom
     sibling = genericSibling
     walk = genericWalk
+
+    # IFilePath navigation
 
     def parent(self):
         if self._path:
@@ -110,6 +112,22 @@ class MemoryPath(AbstractFilePath):
 
     def descendant(self, segments):
         return MemoryPath(self._fs, self._path + tuple(segments))
+
+    # IFilePath writing and reading
+
+    def open(self, mode="r"):
+        return self._fs.open(self._path)
+
+    def createDirectory(self):
+        self._fs._dirs.add(self._path)
+
+    def getContent(self):
+        return self._fs._store[self._path]
+
+    def setContent(self, content, ext=b".new"):
+        self._fs._store[self._path] = content
+
+    # IFilePath stat and other queries
 
     def changed(self):
         pass
@@ -129,15 +147,6 @@ class MemoryPath(AbstractFilePath):
     def basename(self):
         return self._path[-1] if self._path else ""
 
-    def realpath(self):
-        return self
-
-    def open(self, mode="r"):
-        return self._fs.open(self._path)
-
-    def createDirectory(self):
-        self._fs._dirs.add(self._path)
-
     def getsize(self):
         if self._path in self._fs._store:
             return len(self._fs._store[self._path])
@@ -152,3 +161,8 @@ class MemoryPath(AbstractFilePath):
 
     def getAccessTime(self):
         return 0.0
+
+    # IFilePath symlinks
+
+    def realpath(self):
+        return self

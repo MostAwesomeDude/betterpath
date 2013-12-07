@@ -125,3 +125,17 @@ def genericSegmentsFrom(path, ancestor):
         segments.reverse()
         return segments
     raise ValueError("%r not parent of %r" % (ancestor, path))
+
+
+def genericGetContent(path):
+    """
+    Retrieve the data from a given file path.
+    """
+
+    # We are not currently willing to use a with-statement here, for backwards
+    # compatibility.
+    fp = path.open()
+    try:
+        return fp.read()
+    finally:
+        fp.close()

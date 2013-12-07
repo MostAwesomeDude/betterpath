@@ -86,7 +86,7 @@ class IFilePath(Interface):
         @rtype: L{str}
         """
 
-    # Writing
+    # Writing and reading
 
     def open(mode="r"):
         """
@@ -101,6 +101,28 @@ class IFilePath(Interface):
         Create this file path as a directory.
 
         @raise Exception: If the directory cannot be created.
+        """
+
+    def getContent():
+        """
+        Retrieve the bytes located at this file path.
+        """
+
+    def setContent(content, ext=b'.new'):
+        """
+        Replace or create the file at this path with a new file that contains
+        the given bytes.
+
+        This method should attempt to be as atomic as possible.
+
+        @param content: The desired contents of the file at this path.
+        @type content: L{bytes}
+
+        @param ext: An extension to append to the temporary filename used to
+            store the bytes while they are being written.  This can be used to
+            make sure that temporary files can be identified by their suffix,
+            for cleanup in case of crashes.
+        @type ext: L{bytes}
         """
 
     # Stat and other queries
