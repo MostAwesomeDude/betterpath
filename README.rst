@@ -45,3 +45,11 @@ The New Way
         path = base.descendant(fragments)        
         path.parent().makeDirs()
         path.setContent(data)
+
+Changelog
+=========
+
+0.2
+---
+
+* Initial release
