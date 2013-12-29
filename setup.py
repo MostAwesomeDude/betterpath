@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="betterpath",
-    packages=["bp"],
+    packages=["bp", "bp.tests"],
     setup_requires=["vcversioner"],
     vcversioner={},
     install_requires=open("requirements.txt").read().split("\n"),
