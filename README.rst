@@ -9,12 +9,51 @@ over file paths, generalizing the concept of file paths beyond filesystems.
 File Paths
 ==========
 
-bp exposes an interface, `bp.abstract.IFilePath`, for file paths, and provides
-the following concrete implementations:
+bp exposes an interface, ``bp.abstract.IFilePath``, for file paths, and
+provides the following concrete implementations:
 
- * `bp.filepath.FilePath`, for the root filesystem
- * `bp.zippath.ZipPath`, for ZIP archives
- * `bp.memory.MemoryPath`, for in-memory temporary filesystems
+ * ``bp.filepath.FilePath``, for the root filesystem
+ * ``bp.zippath.ZipPath``, for ZIP archives
+ * ``bp.memory.MemoryPath``, for in-memory temporary filesystems
+
+Vs. the Competition
+===================
+
+os.path
+-------
+
+The venerable champ, ``os.path`` has been the cause of (and solution to) most
+of Python's path problems over the years.
+
+Pros
+~~~~
+
+* In the standard library
+
+Cons
+~~~~
+
+* Unsafe
+* Verbose
+* Operates on strs
+* No interfaces or ABCs for functionality
+* Only covers the root filesystem
+
+pathlib
+-------
+
+pathlib hopes to carve a path towards greatness through PEP 428.
+
+Pros
+~~~~
+
+* Convenient ``__div__()`` overloading
+
+Cons
+~~~~
+
+* No interfaces or ABCs for functionality
+* Only covers the root filesystem
 
 Examples
 ========
@@ -28,9 +67,11 @@ The Old Way
 ::
 
     def save(base, fragments, data):
-        # Unsafe either way; what if `fragments` contains ".."?
+        # `fragments` could contain unsafe paths!
+        if ".." in fragments or "." in fragments:
+            raise ValueError("Unsafe paths!")
         path = os.path.join(os.path.abspath(base), os.sep.join(fragments))
-        # path = os.path.join(os.path.abspath(base), *fragments)
+        # Alternatively: path = os.path.join(os.path.abspath(base), *fragments)
         # I hope that this doesn't fail mid-write! Also, did the directories
         # exist? I think so, yes.
         with open(path, "wb") as handle:
