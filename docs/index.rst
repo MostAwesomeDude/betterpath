@@ -16,6 +16,8 @@ Contents:
    readonly
    zippath
 
+   generic
+
 
 Indices and tables
 ==================
