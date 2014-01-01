@@ -12,6 +12,9 @@ Contents:
    :maxdepth: 2
 
    filepath
+   memory
+   readonly
+   zippath
 
 
 Indices and tables
