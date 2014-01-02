@@ -53,8 +53,8 @@ def _stub_islink(path):
     @param path: A path string.
     @type path: L{str}
 
-    @return: C{False}
-    @rtype: L{bool}
+    :return: C{False}
+    :rtype: L{bool}
     """
     return False
 
@@ -66,7 +66,7 @@ armor = base64.urlsafe_b64encode
 
 class InsecurePath(Exception):
     """
-    Error that is raised when the path provided to L{FilePath} is invalid.
+    Error that is raised when the path provided to :py:class:`FilePath` is invalid.
     """
 
 
@@ -74,8 +74,8 @@ def _secureEnoughString():
     """
     Compute a string usable as a new, temporary filename.
 
-    @return: A pseudorandom, 16 byte string for use in secure filenames.
-    @rtype: C{bytes}
+    :return: A pseudorandom, 16 byte string for use in secure filenames.
+    :rtype: C{bytes}
     """
     return armor(sha1(randomBytes(64)).digest())[:16]
 
@@ -102,8 +102,8 @@ class RWX(namedtuple("RWX", "read, write, execute")):
         part of what is printed by command line utilities such as 'ls -l'
         (e.g. 'rwx')
 
-        @return: The shorthand string.
-        @rtype: L{str}
+        :return: The shorthand string.
+        :rtype: L{str}
         """
         returnval = ['r', 'w', 'x']
         i = 0
@@ -146,8 +146,8 @@ class Permissions(namedtuple("Permissions", "user, group, other")):
         what is printed by command line utilities such as 'ls -l'
         (e.g. 'rwx-wx--x')
 
-        @return: The shorthand string.
-        @rtype: L{str}
+        :return: The shorthand string.
+        :rtype: L{str}
         """
         return "".join(
             [x.shorthand() for x in (self.user, self.group, self.other)])
@@ -156,50 +156,59 @@ class Permissions(namedtuple("Permissions", "user, group, other")):
 @implementer(IFilePath)
 class FilePath(object):
     """
-    I am a path on the filesystem that only permits 'downwards' access.
+    I am a path on the filesystem that only permits "downwards" access.
 
-    Instantiate me with a pathname (for example,
-    FilePath('/home/myuser/public_html')) and I will attempt to only provide
+    Instantiate me with a pathname, e.g.
+    FilePath('/home/myuser/public_html'), and I will attempt to only provide
     access to files which reside inside that path.  I may be a path to a file,
     a directory, or a file which does not exist.
 
-    The correct way to use me is to instantiate me, and then do ALL filesystem
-    access through me.  In other words, do not import the 'os' module; if you
-    need to open a file, call my 'open' method.  If you need to list a
-    directory, call my 'path' method.
+    The correct way to use me is to instantiate me, and then do *all*
+    filesystem access through me.  In other words, do not import the ``os``
+    module; if you need to open a file, call my :py:meth:`.open` method.  If
+    you need to list a directory, call my :py:meth:`.listdir` method.
 
     Even if you pass me a relative path, I will convert that to an absolute
     path internally.
 
     Note: although time-related methods do return floating-point results, they
     may still be only second resolution depending on the platform and the last
-    value passed to L{os.stat_float_times}.  If you want greater-than-second
-    precision, call C{os.stat_float_times(True)}, or use Python 2.5.
-    Greater-than-second precision is only available in Windows on Python2.5 and
-    later.
+    value passed to ``os.stat_float_times``.  If you want greater-than-second
+    precision, call ``os.stat_float_times(True)``, or use Python 2.5.
+    Greater-than-second precision is only available in Windows on Python 2.5
+    and later.
 
     On both Python 2 and Python 3, paths can only be bytes.
 
-    @type alwaysCreate: L{bool}
-    @ivar alwaysCreate: When opening this file, only succeed if the file does
-        not already exist.
+    :ivar bool alwaysCreate: When opening this file, only succeed if the file
+                             does not already exist.
 
-    @type path: L{bytes}
-    @ivar path: The path from which 'downward' traversal is permitted.
+    :ivar bytes path: The path from which "downward" traversal is permitted.
 
-    @ivar statinfo: The currently cached status information about the file on
-        the filesystem that this L{FilePath} points to.  This attribute is
-        C{None} if the file is in an indeterminate state (either this
-        L{FilePath} has not yet had cause to call C{stat()} yet or
-        L{FilePath.changed} indicated that new information is required), 0 if
-        C{stat()} was called and returned an error (i.e. the path did not exist
-        when C{stat()} was called), or a C{stat_result} object that describes
-        the last known status of the underlying file (or directory, as the case
-        may be).  Trust me when I tell you that you do not want to use this
-        attribute.  Instead, use the methods on L{FilePath} which give you
-        information about it, like C{getsize()}, C{isdir()},
-        C{getModificationTime()}, and so on.
-    @type statinfo: L{int} or L{types.NoneType} or L{os.stat_result}
+    :ivar os.stat_result statinfo: The currently cached status information
+                                   about the file on the filesystem that this
+                                   :py:class:`FilePath` points to.  This
+                                   attribute is C{None} if the file is in an
+                                   indeterminate state (either this
+                                   :py:class:`FilePath` has not yet had cause
+                                   to call C{stat()} yet or
+                                   L{FilePath.changed} indicated that new
+                                   information is required), 0 if C{stat()}
+                                   was called and returned an error (i.e. the
+                                   path did not exist when C{stat()} was
+                                   called), or a C{stat_result} object that
+                                   describes the last known status of the
+                                   underlying file (or directory, as the case
+                                   may be).  Trust me when I tell you that you
+                                   do not want to use this attribute. Instead,
+                                   use the methods on :py:class:`FilePath`
+                                   which give you information about it, like
+                                   C{getsize()}, C{isdir()},
+                                   C{getModificationTime()}, and so on.
+
+
+    .. warning:: Do not use ``statinfo``. Trust me when I tell you that you do
+                 not want to use this attribute.
     """
 
     statinfo = None
@@ -218,15 +227,15 @@ class FilePath(object):
     def __init__(self, path, alwaysCreate=False):
         """
         Convert a path string to an absolute path if necessary and initialize
-        the L{FilePath} with the result.
+        the :py:class:`FilePath` with the result.
         """
         self.path = abspath(path)
         self.alwaysCreate = alwaysCreate
 
     def __getstate__(self):
         """
-        Support serialization by discarding cached L{os.stat} results and
-        returning everything else.
+        Support serialization by discarding cached :py:func:`os.stat` results
+        and returning everything else.
         """
         d = self.__dict__.copy()
         if 'statinfo' in d:
@@ -235,24 +244,26 @@ class FilePath(object):
 
     def __hash__(self):
         """
-        Hash the same as another L{FilePath} with the same path as mine.
+        Hash the same as another :py:class:`FilePath` with the same path as
+        mine.
         """
         return hash((FilePath, self.path))
 
     def child(self, path):
         """
-        Create and return a new L{FilePath} representing a path contained by
+        Create and return a new :py:class:`FilePath` representing a path contained by
         C{self}.
 
-        @param path: The base name of the new L{FilePath}.  If this contains
-            directory separators or parent references it will be rejected.
-        @type path: L{bytes}
+        :param bytes path: The base name of the new :py:class:`FilePath`.  If
+                           this contains directory separators or parent
+                           references it will be rejected.
 
-        @raise InsecurePath: If the result of combining this path with C{path}
-            would result in a path which is not a direct child of this path.
+        :raises InsecurePath: If the result of combining this path with
+                              C{path} would result in a path which is not a
+                              direct child of this path.
 
-        @return: The child path.
-        @rtype: L{FilePath}
+        :return: The child path.
+        :rtype: :py:class:`FilePath`
         """
         if isWindows and path.count(b":"):
             # Catch paths like C:blah that don't have a slash
@@ -271,12 +282,12 @@ class FilePath(object):
         """
         Use me if C{path} might have slashes in it, but you know they're safe.
 
-        @param path: A relative path (ie, a path not starting with C{"/"})
-            which will be interpreted as a child or descendant of this path.
-        @type path: L{bytes}
+        :param bytes path: A relative path (ie, a path not starting with
+                           C{"/"}) which will be interpreted as a child or
+                           descendant of this path.
 
-        @return: The child path.
-        @rtype: L{FilePath}
+        :return: The child path.
+        :rtype: :py:class:`FilePath`
         """
         newpath = abspath(joinpath(self.path, normpath(path)))
         if not newpath.startswith(self.path):
@@ -294,8 +305,8 @@ class FilePath(object):
 
         If no appropriately-named children exist, this will return C{None}.
 
-        @return: C{None} or the child path.
-        @rtype: L{types.NoneType} or L{FilePath}
+        :return: C{None} or the child path.
+        :rtype: L{types.NoneType} or :py:class:`FilePath`
         """
         p = self.path
         for child in paths:
@@ -331,17 +342,17 @@ class FilePath(object):
 
     def realpath(self):
         """
-        Returns the absolute target as a L{FilePath} if self is a link, self
-        otherwise.
+        Returns the absolute target as a :py:class:`FilePath` if self is a
+        link, self otherwise.
 
         The absolute link is the ultimate file or directory the
         link refers to (for instance, if the link refers to another link, and
         another...).  If the filesystem does not support symlinks, or
-        if the link is cyclical, raises a L{LinkError}.
+        if the link is cyclical, raises a :py:class:`LinkError`.
 
-        @return: L{FilePath} of the target path.
-        @rtype: L{FilePath}
-        @raises LinkError: if links are not supported or links are cyclical.
+        :return: :py:class:`FilePath` of the target path.
+        :rtype: :py:class:`FilePath`
+        :raises LinkError: if links are not supported or links are cyclical.
         """
         result = os.path.realpath(self.path)
 
@@ -358,17 +369,16 @@ class FilePath(object):
         """
         Attempt to return a path with my name, given the extension at C{ext}.
 
-        @param ext: File-extension to search for.
-        @type ext: L{str}
+        :param str ext: File-extension to search for.
 
-        @return: The sibling path.
-        @rtype: L{FilePath}
+        :return: The sibling path.
+        :rtype: :py:class:`FilePath`
         """
         return self.clonePath(self.path + ext)
 
     def linkTo(self, linkFilePath):
         """
-        Creates a symlink to self to at the path in the L{FilePath}
+        Creates a symlink to self to at the path in the :py:class:`FilePath`
         C{linkFilePath}.
 
         Only works on posix systems due to its dependence on
@@ -376,8 +386,7 @@ class FilePath(object):
         C{linkFilePath.parent()} does not exist, or C{linkFilePath} already
         exists.
 
-        @param linkFilePath: a FilePath representing the link to be created.
-        @type linkFilePath: L{FilePath}
+        :param FilePath linkFilePath: the link to be created.
         """
         os.symlink(self.path, linkFilePath.path)
 
@@ -389,14 +398,14 @@ class FilePath(object):
         In all cases the file is opened in binary mode, so it is not necessary
         to include C{"b"} in C{mode}.
 
-        @param mode: The mode to open the file in.  Default is C{"r"}.
-        @type mode: L{str}
-        @raises AssertionError: If C{"a"} is included in the mode and
-            C{alwaysCreate} is C{True}.
-        @rtype: L{file}
-        @return: An open L{file} object.
+        :param str mode: The mode to open the file in.  Default is C{"r"}.
+        :raises AssertionError: If C{"a"} is included in the mode and
+                                C{alwaysCreate} is C{True}.
+        :rtype: L{file}
+        :return: An open L{file} object.
         """
         if self.alwaysCreate:
+            # XXX assertions? In my code?
             assert 'a' not in mode, ("Appending not supported when "
                                      "alwaysCreate == True")
             return self.create()
@@ -412,12 +421,13 @@ class FilePath(object):
         Re-calculate cached effects of 'stat'.  To refresh information on this
         path after you know the filesystem may have changed, call this method.
 
-        @param reraise: a boolean.  If true, re-raise exceptions from
-            L{os.stat}; otherwise, mark this path as not existing, and remove
-            any cached stat information.
+        :param bool reraise: If true, re-raise exceptions from
+                             :py:func:`os.stat`; otherwise, mark this path as
+                             not existing, and remove any cached stat
+                             information.
 
-        @raise Exception: If C{reraise} is C{True} and an exception occurs
-            while reloading metadata.
+        :raise Exception: If C{reraise} is C{True} and an exception occurs
+                          while reloading metadata.
         """
         try:
             self.statinfo = stat(self.path)
@@ -437,9 +447,8 @@ class FilePath(object):
         Changes the permissions on self, if possible.  Propagates errors from
         L{os.chmod} up.
 
-        @param mode: integer representing the new permissions desired (same as
-            the command line chmod)
-        @type mode: L{int}
+        :param int mode: the new permissions desired (same as the command line
+                         chmod)
         """
         os.chmod(self.path, mode)
 
@@ -447,9 +456,9 @@ class FilePath(object):
         """
         Retrieve the size of this file in bytes.
 
-        @return: The size of the file at this file path in bytes.
-        @raise Exception: if the size cannot be obtained.
-        @rtype: L{int}
+        :return: The size of the file at this file path in bytes.
+        :raise Exception: if the size cannot be obtained.
+        :rtype: int
         """
         st = self.statinfo
         if not st:
@@ -461,8 +470,8 @@ class FilePath(object):
         """
         Retrieve the time of last access from this file.
 
-        @return: a number of seconds from the epoch.
-        @rtype: L{float}
+        :return: a number of seconds from the epoch.
+        :rtype: float
         """
         st = self.statinfo
         if not st:
@@ -474,8 +483,8 @@ class FilePath(object):
         """
         Retrieve the time of the last status change for this file.
 
-        @return: a number of seconds from the epoch.
-        @rtype: L{float}
+        :return: a number of seconds from the epoch.
+        :rtype: float
         """
         st = self.statinfo
         if not st:
@@ -487,8 +496,8 @@ class FilePath(object):
         """
         Retrieve the time that this file was last accessed.
 
-        @return: a number of seconds from the epoch.
-        @rtype: L{float}
+        :return: a number of seconds from the epoch.
+        :rtype: float
         """
         st = self.statinfo
         if not st:
@@ -501,10 +510,11 @@ class FilePath(object):
         Retrieve the file serial number, also called inode number, which
         distinguishes this file from all other files on the same device.
 
-        @raise NotImplementedError: if the platform is Windows, since the
-            inode number would be a dummy value for all files in Windows
-        @return: a number representing the file serial number
-        @rtype: L{int}
+        :raise NotImplementedError: if the platform is Windows, since the
+                                    inode number would be a dummy value for
+                                    all files in Windows :return: a number
+                                    representing the file serial number
+        :rtype: int
         """
         if isWindows:
             raise NotImplementedError
@@ -521,10 +531,11 @@ class FilePath(object):
         number together uniquely identify the file, but the device number is
         not necessarily consistent across reboots or system crashes.
 
-        @raise NotImplementedError: if the platform is Windows, since the
-            device number would be 0 for all partitions on a Windows platform
-        @return: a number representing the device
-        @rtype: L{int}
+        :raise NotImplementedError: if the platform is Windows, since the
+                                    device number would be 0 for all
+                                    partitions on a Windows platform
+        :return: a number representing the device
+        :rtype: int
         """
         if isWindows:
             raise NotImplementedError
@@ -544,11 +555,12 @@ class FilePath(object):
         discarded as soon as no process still holds it open.  Symbolic links
         are not counted in the total.
 
-        @raise NotImplementedError: if the platform is Windows, since Windows
-            doesn't maintain a link count for directories, and L{os.stat} does
-            not set C{st_nlink} on Windows anyway.
-        @return: the number of hard links to the file
-        @rtype: L{int}
+        :raise NotImplementedError: if the platform is Windows, since Windows
+                                    doesn't maintain a link count for
+                                    directories, and :py:func:`os.stat` does
+                                    not set C{st_nlink} on Windows anyway.
+        :return: the number of hard links to the file
+        :rtype: int
         """
         if isWindows:
             raise NotImplementedError
@@ -563,10 +575,10 @@ class FilePath(object):
         """
         Returns the user ID of the file's owner.
 
-        @raise NotImplementedError: if the platform is Windows, since the UID
-            is always 0 on Windows
-        @return: the user ID of the file's owner
-        @rtype: L{int}
+        :raise NotImplementedError: if the platform is Windows, since the UID
+                                    is always 0 on Windows
+        :return: the user ID of the file's owner
+        :rtype: L{int}
         """
         if isWindows:
             raise NotImplementedError
@@ -581,10 +593,10 @@ class FilePath(object):
         """
         Returns the group ID of the file.
 
-        @raise NotImplementedError: if the platform is Windows, since the GID
-            is always 0 on windows
-        @return: the group ID of the file
-        @rtype: L{int}
+        :raise NotImplementedError: if the platform is Windows, since the GID
+                                    is always 0 on windows
+        :return: the group ID of the file
+        :rtype: int
         """
         if isWindows:
             raise NotImplementedError
@@ -597,11 +609,11 @@ class FilePath(object):
 
     def getPermissions(self):
         """
-        Returns the permissions of the file.  Should also work on Windows,
+        Returns the permissions of the file.  Should also work on Windows;
         however, those permissions may not be what is expected in Windows.
 
-        @return: the permissions for the file
-        @rtype: L{Permissions}
+        :return: the permissions for the file
+        :rtype: :py:class:`Permissions`
         """
         st = self.statinfo
         if not st:
@@ -611,11 +623,10 @@ class FilePath(object):
 
     def exists(self):
         """
-        Check if this L{FilePath} exists.
+        Check if this :py:class:`FilePath` exists.
 
-        @return: C{True} if the stats of C{path} can be retrieved successfully,
-            C{False} in the other cases.
-        @rtype: L{bool}
+        :return: Whether this path definitely exists.
+        :rtype: bool
         """
         if self.statinfo:
             return True
@@ -628,11 +639,10 @@ class FilePath(object):
 
     def isdir(self):
         """
-        Check if this L{FilePath} refers to a directory.
+        Check if this :py:class:`FilePath` refers to a directory.
 
-        @return: C{True} if this L{FilePath} refers to a directory, C{False}
-            otherwise.
-        @rtype: L{bool}
+        :return: Whether this :py:class:`FilePath` refers to a directory
+        :rtype: bool
         """
         st = self.statinfo
         if not st:
@@ -646,9 +656,10 @@ class FilePath(object):
         """
         Check if this file path refers to a regular file.
 
-        @return: C{True} if this L{FilePath} points to a regular file (not a
-            directory, socket, named pipe, etc), C{False} otherwise.
-        @rtype: L{bool}
+        :return: C{True} if this :py:class:`FilePath` points to a regular file
+                 (not a directory, socket, named pipe, etc), C{False}
+                 otherwise.
+        :rtype: L{bool}
         """
         st = self.statinfo
         if not st:
@@ -662,8 +673,8 @@ class FilePath(object):
         """
         Returns whether the underlying path is a block device.
 
-        @return: C{True} if it is a block device, C{False} otherwise
-        @rtype: L{bool}
+        :return: C{True} if it is a block device, C{False} otherwise
+        :rtype: L{bool}
         """
         st = self.statinfo
         if not st:
@@ -677,8 +688,8 @@ class FilePath(object):
         """
         Returns whether the underlying path is a socket.
 
-        @return: C{True} if it is a socket, C{False} otherwise
-        @rtype: L{bool}
+        :return: C{True} if it is a socket, C{False} otherwise
+        :rtype: L{bool}
         """
         st = self.statinfo
         if not st:
@@ -690,11 +701,11 @@ class FilePath(object):
 
     def islink(self):
         """
-        Check if this L{FilePath} points to a symbolic link.
+        Check if this :py:class:`FilePath` points to a symbolic link.
 
-        @return: C{True} if this L{FilePath} points to a symbolic link,
-            C{False} otherwise.
-        @rtype: L{bool}
+        :return: C{True} if this :py:class:`FilePath` points to a symbolic
+                 link, C{False} otherwise.
+        :rtype: L{bool}
         """
         # We can't use cached stat results here, because that is the stat of
         # the destination - (see #1773) which in *every case* but this one is
@@ -704,35 +715,40 @@ class FilePath(object):
 
     def isabs(self):
         """
-        Check if this L{FilePath} refers to an absolute path.
+        Check if this :py:class:`FilePath` refers to an absolute path.
 
-        This always returns C{True}.
+        .. deprecated:: 0.2
+           This method always returns True. To replace this method, simply
+           replace its usage in code with ``True`` and then simplify as
+           needed.
 
-        @return: C{True}, always.
-        @rtype: L{bool}
+        :return: True
+        :rtype: bool
         """
         return isabs(self.path)
 
     def listdir(self):
         """
-        List the base names of the direct children of this L{FilePath}.
+        List the base names of the direct children of this :py:class:`FilePath`.
 
-        @return: A L{list} of L{bytes} giving the names of the contents of the
-            directory this L{FilePath} refers to.  These names are relative to
-            this L{FilePath}.
-        @rtype: L{list}
+        :return: A L{list} of L{bytes} giving the names of the contents of the
+                 directory this :py:class:`FilePath` refers to.  These names
+                 are relative to this :py:class:`FilePath`.
+        :rtype: L{list}
 
-        @raise OSError: If an error occurs while listing the directory.  If the
-        error is 'serious', meaning that the operation failed due to an access
-        violation, exhaustion of some kind of resource (file descriptors or
-        memory), OSError or a platform-specific variant will be raised.
+        :raise OSError: If an error occurs while listing the directory.  If
+                        the error is 'serious', meaning that the operation
+                        failed due to an access violation, exhaustion of some
+                        kind of resource (file descriptors or memory), OSError
+                        or a platform-specific variant will be raised.
 
-        @raise UnlistableError: If the inability to list the directory is due
-        to this path not existing or not being a directory, the more specific
-        OSError subclass L{UnlistableError} is raised instead.
+        :raise UnlistableError: If the inability to list the directory is due
+                                to this path not existing or not being a
+                                directory, the more specific OSError subclass
+                                L{UnlistableError} is raised instead.
 
-        @raise: Anything the platform L{os.listdir} implementation might raise
-            (typically L{OSError}).
+        :raise: Anything the platform L{os.listdir} implementation might raise
+                (typically L{OSError}).
         """
         try:
             subnames = listdir(self.path)
@@ -780,9 +796,9 @@ class FilePath(object):
         Split the file path into a pair C{(root, ext)} such that
         C{root + ext == path}.
 
-        @return: Tuple where the first item is the filename and second item is
+        :return: Tuple where the first item is the filename and second item is
             the file extension. See Python docs for L{os.path.splitext}.
-        @rtype: L{tuple}
+        :rtype: L{tuple}
         """
         return splitext(self.path)
 
@@ -823,7 +839,7 @@ class FilePath(object):
         Create all directories not yet existing in C{path} segments, using
         L{os.makedirs}.
 
-        @return: C{None}
+        :return: C{None}
         """
         return os.makedirs(self.path)
 
@@ -835,8 +851,8 @@ class FilePath(object):
         @param pattern: A glob pattern to use to match child paths.
         @type pattern: L{bytes}
 
-        @return: A L{list} of matching children.
-        @rtype: L{list}
+        :return: A L{list} of matching children.
+        :rtype: L{list}
         """
         import glob
         path = self.path[-1] == b'/' and self.path + pattern or self.sep.join(
@@ -848,20 +864,20 @@ class FilePath(object):
         Retrieve the final component of the file path's path (everything
         after the final path separator).
 
-        @return: The final component of the L{FilePath}'s path (Everything
+        :return: The final component of the :py:class:`FilePath`'s path (Everything
             after the final path separator).
-        @rtype: L{bytes}
+        :rtype: L{bytes}
         """
         return basename(self.path)
 
     def dirname(self):
         """
-        Retrieve all of the components of the L{FilePath}'s path except the
+        Retrieve all of the components of the :py:class:`FilePath`'s path except the
         last one (everything up to the final path separator).
 
-        @return: All of the components of the L{FilePath}'s path except the
+        :return: All of the components of the :py:class:`FilePath`'s path except the
             last one (everything up to the final path separator).
-        @rtype: L{bytes}
+        :rtype: L{bytes}
         """
         return dirname(self.path)
 
@@ -869,9 +885,9 @@ class FilePath(object):
         """
         A file path for the directory containing the file at this file path.
 
-        @return: A L{FilePath} representing the path which directly contains
-            this L{FilePath}.
-        @rtype: L{FilePath}
+        :return: A :py:class:`FilePath` representing the path which directly contains
+            this :py:class:`FilePath`.
+        :rtype: :py:class:`FilePath`
         """
         return self.clonePath(self.dirname())
 
@@ -938,7 +954,7 @@ class FilePath(object):
 
     def createDirectory(self):
         """
-        Create the directory the L{FilePath} refers to.
+        Create the directory the :py:class:`FilePath` refers to.
 
         @see: L{makedirs}
 
@@ -950,19 +966,17 @@ class FilePath(object):
         """
         Sets the C{alwaysCreate} variable.
 
-        @param val: C{True} or C{False}, indicating whether opening this path
-            will be required to create the file or not.
-        @type val: L{bool}
-
-        @return: C{None}
+        :param bool val: C{True} or C{False}, indicating whether opening this
+                         path will be required to create the file or not.
         """
+
         self.alwaysCreate = val
 
     def create(self):
         """
         Exclusively create a file, only if this file previously did not exist.
 
-        @return: A file-like object opened from this path.
+        :return: A file-like object opened from this path.
         """
         fdint = os.open(self.path, _CREATE_FLAGS)
 
@@ -987,10 +1001,10 @@ class FilePath(object):
 
         @type extension: L{bytes}
 
-        @return: a path object with the given extension suffix, C{alwaysCreate}
+        :return: a path object with the given extension suffix, C{alwaysCreate}
             set to True.
 
-        @rtype: L{FilePath}
+        :rtype: :py:class:`FilePath`
         """
         sib = self.sibling(_secureEnoughString() + self.basename() + extension)
         sib.requireCreate()
