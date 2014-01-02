@@ -31,7 +31,7 @@ ZIP_PATH_SEP = '/'              # In zipfiles, "/" is universally used as the
 @implementer(IFilePath)
 class ZipPath(object):
     """
-    I represent a file or directory contained within a zip file.
+    I am a file or directory contained within a zip file.
     """
 
     sep = ZIP_PATH_SEP
@@ -40,9 +40,9 @@ class ZipPath(object):
         """
         Don't construct me directly.  Use ZipArchive.child().
 
-        @param archive: a ZipArchive instance.
+        :param ZipArchive archive: a ZipArchive instance.
 
-        @param pathInArchive: a ZIP_PATH_SEP-separated string.
+        :param str pathInArchive: a ZIP_PATH_SEP-separated string.
         """
         self.archive = archive
         self.pathInArchive = pathInArchive
@@ -88,12 +88,13 @@ class ZipPath(object):
         Return a new ZipPath representing a path in C{self.archive} which is
         a child of this path.
 
-        @note: Requesting the C{".."} (or other special name) child will not
-            cause L{InsecurePath} to be raised since these names do not have
-            any special meaning inside a zip archive.  Be particularly
-            careful with the C{path} attribute (if you absolutely must use
-            it) as this means it may include special names with special
-            meaning outside of the context of a zip archive.
+        .. note:: Requesting the C{".."} (or other special name) child will
+                  **not** cause L{InsecurePath} to be raised since these names
+                  do not have any special meaning inside a zip archive. Be
+                  particularly careful with the C{path} attribute (if you
+                  absolutely must use it) as this means it may include special
+                  names with special meaning outside of the context of a zip
+                  archive.
         """
         return ZipPath(self.archive,
                        ZIP_PATH_SEP.join([self.pathInArchive, path]))
@@ -141,7 +142,8 @@ class ZipPath(object):
 
     def splitext(self):
         """
-        Return a value similar to that returned by os.path.splitext.
+        Return a value similar to that returned by
+        :py:func:`os.path.splitext`.
         """
         # This happens to work out because of the fact that we use OS-specific
         # path separators in the constructor to construct our fake 'path'
@@ -173,19 +175,23 @@ class ZipPath(object):
 
     def getAccessTime(self):
         """
-        Retrieve this file's last access-time.  This is the same as the last
-        access time for the archive.
+        Retrieve this file's last access-time.
 
-        @return: a number of seconds since the epoch
+        This is the same as the last access time for the archive.
+
+        :return: a number of seconds since the epoch
+        :rtype: int
         """
         return self.archive.getAccessTime()
 
     def getModificationTime(self):
         """
-        Retrieve this file's last modification time.  This is the time of
-        modification recorded in the zipfile.
+        Retrieve this file's last modification time.
 
-        @return: a number of seconds since the epoch.
+        This is the time of modification recorded in the zipfile.
+
+        :return: a number of seconds since the epoch.
+        :rtype: int
         """
         return time.mktime(
             self.archive.zipfile.NameToInfo[self.pathInArchive].date_time
@@ -209,9 +215,10 @@ class ZipArchive(ZipPath):
         Create a ZipArchive, treating the archive at archivePathname as a zip
         file.
 
-        @param archivePathname: a str, naming a path in the filesystem.
-        @param mode: A file mode which can be "r" for reading, "w" for
-                     truncating and writing, or "a" for appending and writing.
+        :param str archivePathname: A path in the filesystem.
+        :param str mode: A file mode which can be "r" for reading, "w" for
+                         truncating and writing, or "a" for appending and
+                         writing.
         """
         self.zipfile = ZipFile(archivePathname, mode)
         self.path = archivePathname
@@ -234,14 +241,14 @@ class ZipArchive(ZipPath):
         """
         Create a ZipPath pointing at a path within the archive.
 
-        @param path: a str with no path separators in it, either '/' or the
-        system path separator, if it's different.
+        :param str path: A string with no path separators in it, either '/' or
+                         the system path separator, if it's different.
         """
         return ZipPath(self, path)
 
     def exists(self):
         """
-        Returns true if the underlying archive exists.
+        Returns whether the underlying archive exists.
         """
         return FilePath(self.zipfile.filename).exists()
 
