@@ -5,8 +5,9 @@ def genericParents(path):
     """
     Retrieve an iterator of all the ancestors of the given path.
 
-    @return: an iterator of all the ancestors of the given path, from the most
+    :return: An iterator of all the ancestors of the given path, from the most
              recent (its immediate parent) to the root of its filesystem.
+    :rtype: iterator
     """
 
     parent = path.parent()
@@ -19,14 +20,13 @@ def genericParents(path):
 
 def genericSibling(path, segment):
     """
-    Return a L{IFilePath} with the same directory as the given path, but with a
-    basename of C{segment}.
+    Return an L{IFilePath} with the same directory as the given path, but with
+    a basename of C{segment}.
 
-    @param segment: The basename of the L{IFilePath} to return.
-    @type segment: L{str}
+    :param str segment: The basename of the L{IFilePath} to return.
 
-    @return: The sibling path.
-    @rtype: L{IFilePath}
+    :return: The sibling path.
+    :rtype: L{IFilePath}
     """
 
     return path.parent().child(segment)
@@ -36,7 +36,8 @@ def genericChildren(path):
     """
     List the children of the given path.
 
-    @return: an iterable of all currently-existing children of the path.
+    :return: an iterable of all currently-existing children of the path.
+    :rtype: iterable
     """
 
     return map(path.child, path.listdir())
@@ -53,10 +54,12 @@ def genericWalk(path, descend=None):
     C{True}.  If C{descend} is not specified, all directories will be
     traversed (including symbolic links which refer to directories).
 
-    @param descend: A one-argument callable that will return True for
-        FilePaths that should be traversed, False otherwise.
+    :param callable descend: A one-argument callable that will return True for
+                             FilePaths that should be traversed, False
+                             otherwise.
 
-    @return: a generator yielding FilePath-like objects.
+    :return: a generator yielding FilePath-like objects.
+    :rtype: generator
     """
 
     # Note that we already agreed to yield this path.
@@ -82,11 +85,10 @@ def genericDescendant(path, segments):
     """
     Retrieve a child or child's child of the given path.
 
-    @param segments: A sequence of path segments as L{str} instances.
+    :param iterable segments: A sequence of path segments as L{str} instances.
 
-    @return: A L{FilePath} constructed by looking up the C{segments[0]}
-        child of this path, the C{segments[1]} child of that path, and so
-        on.
+    :return: A L{FilePath} constructed by looking up the C{segments[0]} child
+             of this path, the C{segments[1]} child of that path, and so on.
     """
 
     for name in segments:
@@ -99,16 +101,17 @@ def genericSegmentsFrom(path, ancestor):
     Return a list of segments between a child and its ancestor.
 
     For example, in the case of a path X representing /a/b/c/d and a path Y
-    representing /a/b, C{Y.segmentsFrom(X)} will return C{['c',
-    'd']}.
+    representing /a/b, C{Y.segmentsFrom(X)} will return C{['c', 'd']}.
 
-    @param ancestor: an instance of the same class as self, ostensibly an
-    ancestor of self.
+    :param ancestor: an instance of the same class as self, ostensibly an
+                     ancestor of self.
 
-    @raise: ValueError if the 'ancestor' parameter is not actually an
-    ancestor, i.e. a path for /x/y/z is passed as an ancestor for /a/b/c/d.
+    :raise ValueError: When the 'ancestor' parameter is not actually an
+                       ancestor, i.e. a path for /x/y/z is passed as an
+                       ancestor for /a/b/c/d.
 
-    @return: a list of strs
+    :return: a list of segments
+    :rtype: list
     """
 
     # The original author alludes to an "obvious fast implementation". I
