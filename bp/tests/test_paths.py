@@ -716,6 +716,24 @@ class FilePathTestCase(AbstractFilePathTestCase):
         fp.preauthChild(b'foo/bar')
         self.assertRaises(filepath.InsecurePath, fp.child, b'/foo')
 
+    def test_noEmptyChild(self):
+        """
+        FilePaths never have a child whose key is the empty string.
+
+        See Twisted #6728.
+        """
+
+        self.assertRaises(filepath.InsecurePath, self.root.child, b"")
+
+    def test_insecureDotSlash(self):
+        """
+        FilePaths never have a child whose key contains directory separators.
+
+        See Twisted #6728.
+        """
+
+        self.assertRaises(filepath.InsecurePath, self.root.child, b"./")
+
     def testStatCache(self):
         p = self.path.child(b'stattest')
         p.touch()

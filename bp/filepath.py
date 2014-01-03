@@ -251,31 +251,45 @@ class FilePath(object):
 
     def child(self, path):
         """
-        Create and return a new :py:class:`FilePath` representing a path contained by
-        C{self}.
+        Create and return a new :py:class:`FilePath` representing a path
+        contained by this path.
 
-        :param bytes path: The base name of the new :py:class:`FilePath`.  If
-                           this contains directory separators or parent
-                           references it will be rejected.
+        :param bytes path: The base name of the new :py:class:`FilePath`. If
+                           it contains directory separators or parent
+                           references, it will be rejected.
 
-        :raises InsecurePath: If the result of combining this path with
-                              C{path} would result in a path which is not a
+        :raises InsecurePath: If the result of combining this path with the
+                              given path would result in a path which is not a
                               direct child of this path.
 
-        :return: The child path.
+        :return: The child path
         :rtype: :py:class:`FilePath`
         """
+
+        # Catch paths like C:blah that don't have a slash. This is
+        # Windows-only.
         if isWindows and path.count(b":"):
-            # Catch paths like C:blah that don't have a slash
-            raise InsecurePath("%r contains a colon." % (path,))
+            raise InsecurePath(
+                "Colons not permitted in Windows: %r" % (path,))
+
+        # Catch paths with separators like "./".
+        if self.sep in path:
+            raise InsecurePath(
+                "%r contains directory separators" % (path,))
+
         norm = normpath(path)
         if self.sep in norm:
             raise InsecurePath(
-                "%r contains one or more directory separators" % (path,))
+                "%r (normalized) contains directory separators" % (norm,))
+
+        # Catch attempted traversals above this location. Also catch paths
+        # like "." or "" which don't traverse anywhere besides the current
+        # path. See Twisted #6728.
         newpath = abspath(joinpath(self.path, norm))
-        if not newpath.startswith(self.path):
+        if newpath == self.path or not newpath.startswith(self.path):
             raise InsecurePath(
                 "%r is not a child of %s" % (newpath, self.path))
+
         return self.clonePath(newpath)
 
     def preauthChild(self, path):
