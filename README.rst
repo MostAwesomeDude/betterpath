@@ -16,6 +16,13 @@ provides the following concrete implementations:
  * ``bp.zippath.ZipPath``, for ZIP archives
  * ``bp.memory.MemoryPath``, for in-memory temporary filesystems
 
+In addition, there are combining abstract file paths which can be wrapped
+around other file paths:
+
+ * ``bp.readonly.ReadOnlyPath``, for read-only filesystems
+
+API documentation is available at http://betterpath.rtfd.org/.
+
 Vs. the Competition
 ===================
 
