@@ -442,6 +442,10 @@ class FilePath(object):
 
         :raise Exception: If C{reraise} is C{True} and an exception occurs
                           while reloading metadata.
+
+        .. note:: Please do not use this method.
+
+        .. deprecated:: 0.2
         """
         try:
             self.statinfo = stat(self.path)
@@ -454,6 +458,7 @@ class FilePath(object):
         """
         Clear any cached information about the state of this path on disk.
         """
+
         self.statinfo = None
 
     def chmod(self, mode):
@@ -526,8 +531,9 @@ class FilePath(object):
 
         :raise NotImplementedError: if the platform is Windows, since the
                                     inode number would be a dummy value for
-                                    all files in Windows :return: a number
-                                    representing the file serial number
+                                    all files in Windows
+
+        :return: a number representing the file serial number
         :rtype: int
         """
         if isWindows:
@@ -911,7 +917,7 @@ class FilePath(object):
         bytes, trying to avoid data-loss in the meanwhile.
 
         On UNIX-like platforms, this method does its best to ensure that by
-        the time this method returns, either the old contents I{or} the new
+        the time this method returns, either the old contents *or* the new
         contents of the file will be present at this path for subsequent
         readers regardless of premature device removal, program crash, or
         power loss, making the following assumptions:
@@ -933,7 +939,7 @@ class FilePath(object):
         in the unlikely event that there is a crash at that point, it should
         be possible for the user to manually recover the new version of their
         data.  In the future, Twisted will support atomic file moves on those
-        versions of Windows which I{do} support them: see U{Twisted ticket
+        versions of Windows which *do* support them: see U{Twisted ticket
         3004<http://twistedmatrix.com/trac/ticket/3004>}.
 
         This method should be safe for use by multiple concurrent processes,
@@ -941,15 +947,13 @@ class FilePath(object):
         ultimately end up on disk if they invoke this method at close to the
         same time.
 
-        @param content: The desired contents of the file at this path.
-        @type content: L{bytes}
+        :param bytes content: The desired contents of the file at this path.
 
-        @param ext: An extension to append to the temporary filename used to
-            store the bytes while they are being written.  This can be used to
-            make sure that temporary files can be identified by their suffix,
-            for cleanup in case of crashes.
-
-        @type ext: L{bytes}
+        :param bytes ext: An extension to append to the temporary filename
+                          used to store the bytes while they are being
+                          written.  This can be used to make sure that
+                          temporary files can be identified by their suffix,
+                          for cleanup in case of crashes.
         """
         sib = self.temporarySibling(ext)
         f = sib.open('w')
@@ -972,7 +976,7 @@ class FilePath(object):
 
         @see: L{makedirs}
 
-        @raise OSError: If the directory cannot be created.
+        :raise OSError: If the directory cannot be created.
         """
         os.mkdir(self.path)
 
@@ -1009,14 +1013,12 @@ class FilePath(object):
         it is created, nor they should other processes be able to guess its
         name in advance.
 
-        @param extension: A suffix to append to the created filename.  (Note
-            that if you want an extension with a '.' you must include the '.'
-            yourself.)
+        :param bytes extension: A suffix to append to the created filename.
+                                (Note that if you want an extension with a '.'
+                                you must include the '.' yourself.)
 
-        @type extension: L{bytes}
-
-        :return: a path object with the given extension suffix, C{alwaysCreate}
-            set to True.
+        :return: A FilePath with the given extension suffix and with
+                 C{alwaysCreate} set to True.
 
         :rtype: :py:class:`FilePath`
         """
@@ -1033,35 +1035,35 @@ class FilePath(object):
         If self doesn't exist, an OSError is raised.
 
         If self is a directory, this method copies its children (but not
-        itself) recursively to destination - if destination does not exist as a
-        directory, this method creates it.  If destination is a file, an
+        itself) recursively to destination - if destination does not exist as
+        a directory, this method creates it.  If destination is a file, an
         IOError will be raised.
 
         If self is a file, this method copies it to destination.  If
         destination is a file, this method overwrites it.  If destination is a
         directory, an IOError will be raised.
 
-        If self is a link (and followLinks is False), self will be copied
-        over as a new symlink with the same target as returned by os.readlink.
+        If self is a link (and followLinks is False), self will be copied over
+        as a new symlink with the same target as returned by os.readlink.
         That means that if it is absolute, both the old and new symlink will
-        link to the same thing.  If it's relative, then perhaps not (and
-        it's also possible that this relative link will be broken).
+        link to the same thing.  If it's relative, then perhaps not (and it's
+        also possible that this relative link will be broken).
 
         File/directory permissions and ownership will NOT be copied over.
 
         If followLinks is True, symlinks are followed so that they're treated
-        as their targets.  In other words, if self is a link, the link's target
-        will be copied.  If destination is a link, self will be copied to the
-        destination's target (the actual destination will be destination's
-        target).  Symlinks under self (if self is a directory) will be
-        followed and its target's children be copied recursively.
+        as their targets.  In other words, if self is a link, the link's
+        target will be copied.  If destination is a link, self will be copied
+        to the destination's target (the actual destination will be
+        destination's target).  Symlinks under self (if self is a directory)
+        will be followed and its target's children be copied recursively.
 
         If followLinks is False, symlinks will be copied over as symlinks.
 
-        @param destination: the destination (a FilePath) to which self
-            should be copied
-        @param followLinks: whether symlinks in self should be treated as links
-            or as their targets
+        :param FilePath destination: the destination (a FilePath) to which
+                                     self should be copied
+        :param bool followLinks: whether symlinks in self should be treated as
+                                 links or as their targets
         """
         if self.islink() and not followLinks:
             os.symlink(os.readlink(self.path), destination.path)
