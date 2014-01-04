@@ -107,6 +107,22 @@ class AbstractFilePathTestCase(BytesTestCase):
         x = [foo.path for foo in self.path.walk()]
         self.assertEqual(set(x), set(self.all))
 
+    def test_walkPredicateOnDirectories(self):
+        """
+        walk() only evaluates the predicate of recursion on directories, not
+        any other sort of path.
+
+        See Twisted #5123.
+        """
+
+        def pred(fp):
+            assert fp.isdir()
+            return True
+
+        # Iterate in order to run walk(), since it is usually a generator.
+        for path in self.path.walk(descend=pred):
+            pass
+
     def test_rootParent(self):
         """
         IFilePath roots are their own parents.

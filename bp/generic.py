@@ -48,17 +48,16 @@ def genericWalk(path, descend=None):
     Yield a path, then each of its children, and each of those children's
     children in turn.
 
-    The optional argument C{descend} is a predicate that takes a FilePath,
-    and determines whether or not that FilePath is traversed/descended
-    into.  It will be called with each path for which C{isdir} returns
-    C{True}.  If C{descend} is not specified, all directories will be
-    traversed (including symbolic links which refer to directories).
-
     :param callable descend: A one-argument callable that will return True for
-                             FilePaths that should be traversed, False
-                             otherwise.
+                             FilePaths that should be traversed and False
+                             otherwise. It will be called with each path for
+                             which :py:meth:`.isdir` returns True. If omitted,
+                             all directories will be traversed, including
+                             symbolic links.
 
-    :return: a generator yielding FilePath-like objects.
+    :raises LinkError: A cycle of symbolic links was found
+
+    :return: a generator yielding FilePath-like objects
     :rtype: generator
     """
 
@@ -69,7 +68,8 @@ def genericWalk(path, descend=None):
         for c in path.children():
             # we should first see if it's what we want, then we
             # can walk through the directory
-            if descend is None or descend(c):
+            pred = descend is None or (c.isdir() and descend(c))
+            if pred:
                 for subc in c.walk(descend):
                     # Check for symlink loops.
                     rsubc = subc.realpath()
