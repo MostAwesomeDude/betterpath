@@ -1,4 +1,5 @@
 from base64 import b64decode
+import os.path
 from zlib import decompress
 
 from bp.iso import ISOPath
@@ -26,6 +27,11 @@ AADM9g1BnfEm
 
 
 class ISOPathTestCase(AbstractFilePathTestCase):
+
+    def _mkpath(self, *p):
+        self.all.append("/".join(p))
+        x = os.path.abspath(os.path.join(self.cmn, *p))
+        return x
 
     def setUp(self):
         fs = MemoryFS()

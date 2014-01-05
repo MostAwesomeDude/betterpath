@@ -1,3 +1,4 @@
+from calendar import timegm
 from collections import namedtuple
 from datetime import datetime
 from StringIO import StringIO
@@ -79,6 +80,13 @@ class Primary(
         return cls(identifier, root, creator, ctime, mtime)
 
 
+def fixName(name):
+    name = name.rsplit(";", 1)[0]
+    if name.endswith("."):
+        name = name.rstrip(".")
+    return name
+
+
 class ISO(object):
 
     primary = None
@@ -130,9 +138,15 @@ class ISO(object):
                 offset += size
 
                 record = Record.fromEntry(data)
-                if record.isdir and record.name not in ("\x00", "\x01"):
+
+                if record.isdir and record.name in ("\x00", "\x01"):
+                    continue
+
+                if record.isdir:
                     t = segments + (record.name,)
                     self._dirs[t] = record.extent
+                else:
+                    record = record._replace(name=fixName(record.name))
                 yield record
 
     def findDir(self, segments):
@@ -153,6 +167,9 @@ class ISO(object):
         return self._dirs.get(segments)
 
     def findRecord(self, segments):
+        if not segments:
+            return self.primary.root
+
         parent = segments[:-1]
         name = segments[-1]
 
@@ -295,12 +312,11 @@ class ISOPath(object):
         return record.size
 
     def getModificationTime(self):
-        try:
-            record = self._iso.findRecord(self._path)
-        except ValueError:
+        record = self._iso.findRecord(self._path)
+        if record is None:
             raise Exception("I don't exist")
 
-        return record.time
+        return float(timegm(record.time.timetuple()))
 
     getStatusChangeTime = getModificationTime
     getAccessTime = getModificationTime
