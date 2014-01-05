@@ -21,6 +21,12 @@ class MemoryFile(StringIO):
         StringIO.__init__(self, buf)
         self._target = store, key
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc_info):
+        self.close()
+
     def close(self):
         buf = self.getvalue()
         store, key = self._target
