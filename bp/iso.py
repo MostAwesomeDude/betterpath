@@ -9,6 +9,7 @@ from bp.abstract import IFilePath
 from bp.errors import UnlistableError
 from bp.generic import (genericChildren, genericParents, genericSegmentsFrom,
                         genericSibling, genericWalk)
+from bp.util import modeIsWriting
 
 
 PRIMARYVD = 0x01
@@ -142,21 +143,25 @@ class ISO(object):
             ts.append(t)
 
         for t in reversed(ts):
+            if t not in self._dirs:
+                # Not a directory; return None.
+                return None
+
             for r in self.readRecords(self._dirs[t], t):
                 pass
 
         return self._dirs.get(segments)
 
     def findRecord(self, segments):
-        parent = self._path[:-1]
-        name = self._path[-1]
+        parent = segments[:-1]
+        name = segments[-1]
 
         extent = self.findDir(parent)
 
         if extent is None:
             return None
 
-        for record in self._iso.readRecords(extent, parent):
+        for record in self.readRecords(extent, parent):
             if record.name == name:
                 return record
         else:
@@ -197,6 +202,7 @@ class ISOPath(object):
 
         self = cls(path=path)
         self._iso = iso
+        return self
 
     def __eq__(self, other):
         return self._fp == other._fp and self._path == other._path
@@ -271,7 +277,8 @@ class ISOPath(object):
         return self._iso.findDir(self._path) is not None
 
     def isfile(self):
-        return self._iso.findFile(self._path) is not None
+        record = self._iso.findRecord(self._path)
+        return record is not None and record.isdir == False
 
     def islink(self):
         return False
