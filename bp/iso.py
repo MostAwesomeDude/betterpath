@@ -205,10 +205,10 @@ class ISOPath(object):
         return self
 
     def __eq__(self, other):
-        return self._fp == other._fp and self._path == other._path
+        return self._iso == other._iso and self._path == other._path
 
     def __hash__(self):
-        return hash((ISOPath, self._fp, self._path))
+        return hash((ISOPath, self._iso, self._path))
 
     @property
     def path(self):
@@ -220,8 +220,7 @@ class ISOPath(object):
         if extent is None:
             raise UnlistableError()
 
-        for record in self._iso.readRecords(extent, self._path):
-            yield record.name
+        return [r.name for r in self._iso.readRecords(extent, self._path)]
 
     # IFilePath generic methods
 
@@ -257,9 +256,8 @@ class ISOPath(object):
         raise Exception("ISOs are read-only")
 
     def getContent(self):
-        try:
-            record = self._iso.findRecord(self._path)
-        except ValueError:
+        record = self._iso.findRecord(self._path)
+        if record is None:
             raise Exception("I don't exist")
 
         data = self._iso.readExtent(record.extent, record.size)
@@ -290,9 +288,8 @@ class ISOPath(object):
         return self._path[-1] if self._path else ""
 
     def getsize(self):
-        try:
-            record = self._iso.findRecord(self._path)
-        except ValueError:
+        record = self._iso.findRecord(self._path)
+        if record is None:
             raise Exception("I don't exist")
 
         return record.size
