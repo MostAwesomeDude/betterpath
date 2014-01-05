@@ -51,3 +51,8 @@ class ISOPathTestCase(AbstractFilePathTestCase):
 
         self.assertRaises(Exception,
                           self.path.child(b"directory").createDirectory)
+
+    def test_walk(self):
+        AbstractFilePathTestCase.test_walk(self)
+
+    test_walk.todo = "Joliet/Rock Ridge names need to be allowed"
